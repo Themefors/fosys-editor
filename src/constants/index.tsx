@@ -1,9 +1,11 @@
 import {
   Bold,
   Code,
-  Highlighter,
   Italic,
   Link,
+  List,
+  ListOrdered,
+  PaintBucket,
   Palette,
   RotateCcw,
   RotateCw,
@@ -28,6 +30,8 @@ export enum RichTextAction {
   Code = 'code',
   Link = 'link',
   TextColor = 'textColor',
+  UnorderedList = 'unorderedList',
+  OrderedList = 'orderedList',
   LeftAlign = 'leftAlign',
   CenterAlign = 'centerAlign',
   RightAlign = 'rightAlign',
@@ -70,8 +74,8 @@ export const RICH_TEXT_OPTIONS = [
   },
   {
     id: RichTextAction.Highlight,
-    icon: <Highlighter {...iconStyles} />,
-    label: 'Highlight',
+    icon: <PaintBucket {...iconStyles} />,
+    label: 'PaintBucket',
   },
   {
     id: RichTextAction.Strikethrough,
@@ -92,6 +96,17 @@ export const RICH_TEXT_OPTIONS = [
     id: RichTextAction.Code,
     icon: <Code {...iconStyles} />,
     label: 'Code',
+  },
+  { id: RichTextAction.Divider },
+  {
+    id: RichTextAction.UnorderedList,
+    icon: <List {...iconStyles} />,
+    label: 'Bullet List',
+  },
+  {
+    id: RichTextAction.OrderedList,
+    icon: <ListOrdered {...iconStyles} />,
+    label: 'Numbered List',
   },
   { id: RichTextAction.Divider },
   {
