@@ -4,6 +4,7 @@ import {
   Highlighter,
   Italic,
   Link,
+  Palette,
   RotateCcw,
   RotateCw,
   Strikethrough,
@@ -26,6 +27,7 @@ export enum RichTextAction {
   Highlight = 'highlight',
   Code = 'code',
   Link = 'link',
+  TextColor = 'textColor',
   LeftAlign = 'leftAlign',
   CenterAlign = 'centerAlign',
   RightAlign = 'rightAlign',
@@ -62,10 +64,14 @@ export const RICH_TEXT_OPTIONS = [
     label: 'Insert Link',
   },
   {
+    id: RichTextAction.TextColor,
+    icon: <Palette {...iconStyles} />,
+    label: 'Text Color',
+  },
+  {
     id: RichTextAction.Highlight,
     icon: <Highlighter {...iconStyles} />,
     label: 'Highlight',
-    fontSize: 10,
   },
   {
     id: RichTextAction.Strikethrough,
@@ -108,7 +114,6 @@ export const RICH_TEXT_OPTIONS = [
     icon: <TextAlignJustify {...iconStyles} />,
     label: 'Align Justify',
   },
-
   { id: RichTextAction.Divider },
   {
     id: RichTextAction.Undo,
@@ -123,4 +128,5 @@ export const RICH_TEXT_OPTIONS = [
 ];
 
 export const LOW_PRIORITY = 1;
+
 export const HEADINGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];

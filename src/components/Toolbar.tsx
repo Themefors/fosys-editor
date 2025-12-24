@@ -11,7 +11,7 @@ import {
   $isHeadingNode,
   type HeadingTagType,
 } from '@lexical/rich-text';
-import { $wrapNodes } from '@lexical/selection';
+import { $patchStyleText, $wrapNodes } from '@lexical/selection';
 import { mergeRegister } from '@lexical/utils';
 import {
   $getSelection,
@@ -20,15 +20,19 @@ import {
   CAN_UNDO_COMMAND,
   FORMAT_ELEMENT_COMMAND,
   FORMAT_TEXT_COMMAND,
+  INSERT_PARAGRAPH_COMMAND,
   REDO_COMMAND,
   SELECTION_CHANGE_COMMAND,
   UNDO_COMMAND,
 } from 'lexical';
 import { useEffect, useState } from 'react';
+import ColorPicker from './ColorPicker';
 import LinkEditor from './LinkEditor';
 
 const Toolbar = () => {
   const [editor] = useLexicalComposerContext();
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [hasTextColor, setHasTextColor] = useState(false);
   const [disableMap, setDisableMap] = useState<{ [id: string]: boolean }>({
     [RichTextAction.Undo]: true,
     [RichTextAction.Redo]: true,
@@ -57,6 +61,9 @@ const Toolbar = () => {
       const node = selection.anchor.getNode();
       const parent = node.getParent();
       setIsLink($isLinkNode(parent));
+
+      const style = node.getStyle();
+      setHasTextColor(style ? style.includes('color:') : false);
 
       const anchorNode = selection.anchor.getNode();
       const element =
@@ -97,6 +104,53 @@ const Toolbar = () => {
           return payload;
         },
         LOW_PRIORITY
+      ),
+      editor.registerCommand(
+        INSERT_PARAGRAPH_COMMAND,
+        () => {
+          setTimeout(() => {
+            editor.update(() => {
+              const selection = $getSelection();
+              if ($isRangeSelection(selection)) {
+                // Clear all text formats
+                const formats: Array<
+                  | 'bold'
+                  | 'italic'
+                  | 'underline'
+                  | 'strikethrough'
+                  | 'code'
+                  | 'subscript'
+                  | 'superscript'
+                  | 'highlight'
+                > = [
+                  'bold',
+                  'italic',
+                  'underline',
+                  'strikethrough',
+                  'code',
+                  'subscript',
+                  'superscript',
+                  'highlight',
+                ];
+
+                formats.forEach((format) => {
+                  if (selection.hasFormat(format)) {
+                    selection.toggleFormat(format);
+                  }
+                });
+
+                $patchStyleText(selection, {
+                  color: null,
+                  'background-color': null,
+                  'font-size': null,
+                  'font-family': null,
+                });
+              }
+            });
+          }, 0);
+          return false;
+        },
+        LOW_PRIORITY
       )
     );
   }, [editor]);
@@ -115,6 +169,11 @@ const Toolbar = () => {
 
       case RichTextAction.Underline: {
         editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline');
+        break;
+      }
+
+      case RichTextAction.TextColor: {
+        setShowColorPicker(!showColorPicker);
         break;
       }
 
@@ -224,8 +283,10 @@ const Toolbar = () => {
               onClick={() => onAction(id)}
               disabled={disableMap[id]}
               className={
-                selectionMap[id] || (id === RichTextAction.Link && isLink)
-                  ? 'bg-blue-500! text-white p-2.5 cursor-pointer border disabled:opacity-50 transition duration-100'
+                selectionMap[id] ||
+                (id === RichTextAction.Link && isLink) ||
+                (id === RichTextAction.TextColor && hasTextColor)
+                  ? 'bg-blue-500 text-white p-2.5 cursor-pointer border disabled:opacity-50 transition duration-100'
                   : 'bg-gray-100 p-2.5 cursor-pointer border disabled:opacity-50 transition duration-100'
               }
               aria-label={label}
@@ -238,6 +299,10 @@ const Toolbar = () => {
 
       {showLinkEditor && (
         <LinkEditor onClose={() => setShowLinkEditor(false)} />
+      )}
+
+      {showColorPicker && (
+        <ColorPicker onClose={() => setShowColorPicker(false)} />
       )}
     </div>
   );
